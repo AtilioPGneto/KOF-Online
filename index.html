@@ -7,47 +7,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     :root {
-      --red: #ff003c;
-      --yellow: #ffe600;
-      --cyan: #00f0ff;
-      --dark: #0a0a0f;
-      --panel: #10101a;
-      --border: #1e1e2e;
+      --red: #ff003c; --yellow: #ffe600; --cyan: #00f0ff;
+      --dark: #0a0a0f; --panel: #10101a; --border: #1e1e2e;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: var(--dark);
-      color: #fff;
+      background: var(--dark); color: #fff;
       font-family: 'Share Tech Mono', monospace;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
+      display: flex; flex-direction: column; align-items: center; padding: 20px;
     }
     .arcade-cabinet {
-      width: 100%;
-      max-width: 800px;
-      background: var(--panel);
-      border: 2px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      width: 100%; max-width: 800px;
+      background: var(--panel); border: 2px solid var(--border);
+      border-radius: 8px; padding: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
     }
-    #game-container {
-      width: 100%;
-      aspect-ratio: 4/3;
-      background: #000;
-    }
+    #game-container { width: 100%; aspect-ratio: 4/3; background: #000; }
     .btn-launch {
-      margin-top: 20px;
-      padding: 15px 30px;
-      background: var(--red);
-      color: white;
-      border: none;
-      font-family: 'Press Start 2P', cursive;
-      cursor: pointer;
-      font-size: 12px;
+      margin-top: 20px; padding: 15px 30px;
+      background: var(--red); color: white; border: none;
+      font-family: 'Press Start 2P', cursive; cursor: pointer; font-size: 12px;
     }
     .btn-launch:disabled { background: #444; cursor: not-allowed; }
   </style>
@@ -69,43 +47,31 @@
     document.getElementById('btnLaunch').disabled = true;
     const container = document.getElementById('game-container');
     
-    // O segredo para evitar os erros de 'undefined' é definir os botões manualmente
-    // e garantir que o volume inicial não seja nulo.
+    // Montando o conteúdo do emulador
     const iframeHTML = `
 <!DOCTYPE html>
 <html>
 <head>
-  <style>body { margin:0; background:#000; overflow:hidden; }</style>
+  <style>body { margin:0; background:#000; overflow:hidden; width:100vw; height:100vh; }</style>
 </head>
 <body>
   <div id="game"></div>
   <script>
-    // Configurações Globais
     window.EJS_player = '#game';
-    window.EJS_core = 'fbneo'; // Core para Neo Geo
+    window.EJS_core = 'geolith'; // Core mais estável para Neo Geo
     window.EJS_gameUrl = 'roms/kof94.zip';
     window.EJS_biosUrl = 'roms/neogeo.zip';
     window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
-    
-    // Solução para o erro 'AL' (Áudio)
-    window.EJS_volume = 0.5;
     window.EJS_startOnLoaded = true;
+    window.EJS_neogeoBios = true;
+    window.EJS_volume = 0.5;
 
-    // Solução para o erro '0' (setupKeys)
-    // Definimos um mapeamento padrão para o Player 1
     window.EJS_buttons = {
       '0': {
         'v': [
-          { 'k': 38 }, // Up
-          { 'k': 40 }, // Down
-          { 'k': 37 }, // Left
-          { 'k': 39 }, // Right
-          { 'k': 65 }, // A
-          { 'k': 83 }, // B
-          { 'k': 90 }, // C
-          { 'k': 88 }, // D
-          { 'k': 13 }, // Start
-          { 'k': 16 }  // Select
+          { 'k': 38 }, { 'k': 40 }, { 'k': 37 }, { 'k': 39 }, // Direcionais
+          { 'k': 65 }, { 'k': 83 }, { 'k': 90 }, { 'k': 88 }, // A, B, C, D
+          { 'k': 13 }, { 'k': 16 } // Start, Select
         ]
       }
     };
@@ -113,28 +79,15 @@
   <script src="https://cdn.emulatorjs.org/stable/data/loader.js"><\/script>
 </body>
 </html>`;
-  EJS_player = '#game';
-  EJS_core = 'geolith'; // Mudança para um core mais tolerante
-  EJS_gameUrl = 'roms/kof94.zip';
-  EJS_biosUrl = 'roms/neogeo.zip';
-  EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
-  EJS_startOnLoaded = true;
-  
-  // Estas linhas forçam o emulador a ignorar erros pequenos de checksum
-  EJS_neogeoBios = true;
-  EJS_load_no_rom = false; 
 
-  // Mapeamento manual para evitar o erro de 'undefined' no setupKeys
-  EJS_buttons = {
-    '0': {
-      'v': [
-        { 'k': 38 }, { 'k': 40 }, { 'k': 37 }, { 'k': 39 }, // Direcionais
-        { 'k': 65 }, { 'k': 83 }, { 'k': 90 }, { 'k': 88 }, // Botões A,B,C,D
-        { 'k': 13 }, { 'k': 16 } // Start e Select
-      ]
-    }
-  };
-</script>
+    // CRIANDO O IFRAME E INJETANDO NO CONTAINER (Isso faltava no seu)
+    const iframe = document.createElement('iframe');
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
+    iframe.srcdoc = iframeHTML;
+    container.appendChild(iframe);
+  }
 </script>
 </body>
 </html>
