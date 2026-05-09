@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ARCADE EMU - Kirby Edition</title>
+  <title>ARCADE EMU</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     :root {
       --red: #ff003c;
       --yellow: #ffe600;
       --cyan: #00f0ff;
-      --kirby-pink: #ffafcc; /* Cor do Kirby para o Benji */
       --dark: #0a0a0f;
       --panel: #10101a;
       --border: #1e1e2e;
@@ -21,68 +20,59 @@
       color: #fff;
       font-family: 'Share Tech Mono', monospace;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
     }
-    header { text-align: center; padding: 2rem 1rem 1.2rem; }
-    .logo {
-      font-family: 'Press Start 2P', monospace;
-      font-size: clamp(1rem, 4vw, 2rem);
-      color: var(--kirby-pink);
-      text-shadow: 0 0 20px #ffafcc66;
-    }
-    .logo span { color: var(--cyan); }
-    .tagline { margin-top: 0.6rem; font-size: 0.65rem; color: var(--yellow); letter-spacing: 0.3em; }
-    
-    main { max-width: 860px; margin: 0 auto; padding: 0 1.2rem 3rem; }
-
     .arcade-cabinet {
-      background: var(--panel);
-      border: 2px solid var(--kirby-pink);
-      border-radius: 8px;
-      overflow: hidden;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 0 30px rgba(255, 175, 204, 0.2);
-    }
-    #game { width: 100%; aspect-ratio: 4/3; background: #000; }
-
-    .btn-launch {
       width: 100%;
-      padding: 1.2rem;
-      background: var(--kirby-pink);
-      border: none;
-      border-radius: 5px;
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.7rem;
-      color: #000;
-      cursor: pointer;
-      transition: transform 0.1s;
+      max-width: 800px;
+      background: var(--panel);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
     }
-    .btn-launch:active { transform: scale(0.98); }
-    #status-msg { text-align: center; margin: 1rem 0; font-size: 0.8rem; color: var(--kirby-pink); }
+    #game-container {
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: #000;
+    }
+    .btn-launch {
+      margin-top: 20px;
+      padding: 15px 30px;
+      background: var(--red);
+      color: white;
+      border: none;
+      font-family: 'Press Start 2P', cursive;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .btn-launch:disabled { background: #444; cursor: not-allowed; }
   </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">KIRBY <span>ARCADE</span></div>
-  <div class="tagline">ESPECIAL PARA O BENJI</div>
-</header>
+  <header style="text-align: center; margin-bottom: 20px;">
+    <h1 style="font-family: 'Press Start 2P'; color: var(--cyan);">ARCADE EMU</h1>
+  </header>
 
-<main>
-  <div class="arcade-cabinet" id="cabinet" style="display:none">
-    <div id="game"></div>
+  <div class="arcade-cabinet">
+    <div id="game-container"></div>
   </div>
 
-  <div id="status-msg">Pronto para jogar?</div>
-  <button class="btn-launch" id="btnLaunch" onclick="launchGame()">⭐ INICIAR AVENTURA ⭐</button>
-</main>
+  <button class="btn-launch" id="btnLaunch" onclick="launchGame()">INICIAR JOGO</button>
 
 <script>
   function launchGame() {
-    document.getElementById('btnLaunch').style.display = 'none';
-    const cabinet = document.getElementById('cabinet');
-    cabinet.style.display = 'block';
-
-    const iframeHTML = `<!DOCTYPE html>
+    document.getElementById('btnLaunch').disabled = true;
+    const container = document.getElementById('game-container');
+    
+    // O segredo para evitar os erros de 'undefined' é definir os botões manualmente
+    // e garantir que o volume inicial não seja nulo.
+    const iframeHTML = `
+<!DOCTYPE html>
 <html>
 <head>
   <style>body { margin:0; background:#000; overflow:hidden; }</style>
@@ -90,39 +80,46 @@
 <body>
   <div id="game"></div>
   <script>
-    // Correção dos erros de 'undefined' e mapeamento de teclas
-    EJS_player = '#game';
-    EJS_core = 'fbneo';
-    EJS_gameUrl = 'roms/kof94.zip';
-    EJS_biosUrl = 'roms/neogeo.zip';
-    EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
-    EJS_startOnLoaded = true;
-    EJS_volume = 0.5;
+    // Configurações Globais
+    window.EJS_player = '#game';
+    window.EJS_core = 'fbneo'; // Core para Neo Geo
+    window.EJS_gameUrl = 'roms/kof94.zip';
+    window.EJS_biosUrl = 'roms/neogeo.zip';
+    window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
     
-    // Mapeamento manual para evitar erro no setupKeys
-    EJS_buttons = {
-      '0': { 
+    // Solução para o erro 'AL' (Áudio)
+    window.EJS_volume = 0.5;
+    window.EJS_startOnLoaded = true;
+
+    // Solução para o erro '0' (setupKeys)
+    // Definimos um mapeamento padrão para o Player 1
+    window.EJS_buttons = {
+      '0': {
         'v': [
-          {'k': 38}, {'k': 40}, {'k': 37}, {'k': 39}, // Setas
-          {'k': 65}, {'k': 83}, {'k': 90}, {'k': 88}, // A, S, Z, X
-          {'k': 13}, {'k': 16} // Start, Select
+          { 'k': 38 }, // Up
+          { 'k': 40 }, // Down
+          { 'k': 37 }, // Left
+          { 'k': 39 }, // Right
+          { 'k': 65 }, // A
+          { 'k': 83 }, // B
+          { 'k': 90 }, // C
+          { 'k': 88 }, // D
+          { 'k': 13 }, // Start
+          { 'k': 16 }  // Select
         ]
       }
     };
-
-    // Configurações extras de estabilidade
-    EJS_DEBUG_XX = false; 
-    EJS_defaultControls = 1;
   <\/script>
   <script src="https://cdn.emulatorjs.org/stable/data/loader.js"><\/script>
 </body>
 </html>`;
 
-    const gameDiv = document.getElementById('game');
     const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'width:100%; height:100%; border:none;';
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
     iframe.srcdoc = iframeHTML;
-    gameDiv.appendChild(iframe);
+    container.appendChild(iframe);
   }
 </script>
 </body>
