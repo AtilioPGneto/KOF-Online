@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ARCADE EMU</title>
+  <title>ARCADE EMU - Kirby Edition</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     :root {
       --red: #ff003c;
       --yellow: #ffe600;
       --cyan: #00f0ff;
+      --kirby-pink: #ffafcc; /* Cor do Kirby para o Benji */
       --dark: #0a0a0f;
       --panel: #10101a;
       --border: #1e1e2e;
@@ -21,293 +22,108 @@
       font-family: 'Share Tech Mono', monospace;
       min-height: 100vh;
     }
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px);
-      pointer-events: none;
-      z-index: 9999;
-    }
     header { text-align: center; padding: 2rem 1rem 1.2rem; }
     .logo {
       font-family: 'Press Start 2P', monospace;
       font-size: clamp(1rem, 4vw, 2rem);
-      color: var(--yellow);
-      text-shadow: 0 0 20px #ffe60066;
+      color: var(--kirby-pink);
+      text-shadow: 0 0 20px #ffafcc66;
     }
-    .logo span { color: var(--red); text-shadow: 0 0 20px #ff003c66; }
-    .tagline { margin-top: 0.6rem; font-size: 0.65rem; color: var(--cyan); letter-spacing: 0.3em; }
-    .divider {
-      width: 100%; max-width: 700px; margin: 1.2rem auto;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--red), var(--yellow), var(--cyan), transparent);
-    }
+    .logo span { color: var(--cyan); }
+    .tagline { margin-top: 0.6rem; font-size: 0.65rem; color: var(--yellow); letter-spacing: 0.3em; }
+    
     main { max-width: 860px; margin: 0 auto; padding: 0 1.2rem 3rem; }
 
-    /* EMULATOR */
     .arcade-cabinet {
       background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 4px;
+      border: 2px solid var(--kirby-pink);
+      border-radius: 8px;
       overflow: hidden;
       margin-bottom: 1.5rem;
+      box-shadow: 0 0 30px rgba(255, 175, 204, 0.2);
     }
-    .screen-label {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.45rem;
-      color: #ffffff33;
-      letter-spacing: 0.2em;
-      padding: 0.6rem 1rem;
-      background: #05050d;
-      border-bottom: 1px solid var(--border);
-      text-align: center;
-    }
-    #game {
-      width: 100%;
-      aspect-ratio: 4/3;
-      background: #000;
-      display: block;
-    }
-    #game iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
-    .controls-panel {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      padding: 1rem 1.5rem;
-      background: #0c0c16;
-      border-top: 1px solid var(--border);
-    }
-    .ctrl-group { min-width: 140px; }
-    .ctrl-label { font-size: 0.55rem; color: var(--red); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.35rem; }
-    .ctrl-row { display: flex; align-items: center; gap: 0.4rem; font-size: 0.65rem; color: #ffffffaa; margin-bottom: 0.2rem; }
-    .kbd {
-      background: #1a1a2a;
-      border: 1px solid #ffffff22;
-      border-bottom: 2px solid #ffffff11;
-      border-radius: 3px;
-      padding: 0.1rem 0.35rem;
-      font-size: 0.6rem;
-      color: var(--cyan);
-      white-space: nowrap;
-    }
-
-    /* CONFIG */
-    .config-box {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-    .config-box h2 {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.55rem;
-      color: var(--cyan);
-      letter-spacing: 0.15em;
-      margin-bottom: 1.2rem;
-    }
-    .info-row {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.6rem 0.8rem;
-      background: #05050d;
-      border: 1px solid #ffffff0f;
-      border-radius: 3px;
-      margin-bottom: 0.75rem;
-      font-size: 0.72rem;
-    }
-    .info-row .tag {
-      font-size: 0.55rem;
-      color: #ffffff44;
-      letter-spacing: 0.1em;
-      min-width: 40px;
-    }
-    .info-row .val { color: var(--cyan); }
-    .info-row .badge {
-      margin-left: auto;
-      font-size: 0.55rem;
-      background: #00f0ff18;
-      border: 1px solid var(--cyan);
-      color: var(--cyan);
-      padding: 0.1rem 0.5rem;
-      border-radius: 2px;
-    }
-    .badge.ok { background: #00ff6618; border-color: #00ff66; color: #00ff66; }
+    #game { width: 100%; aspect-ratio: 4/3; background: #000; }
 
     .btn-launch {
       width: 100%;
-      padding: 0.9rem;
-      background: var(--red);
+      padding: 1.2rem;
+      background: var(--kirby-pink);
       border: none;
-      border-radius: 3px;
+      border-radius: 5px;
       font-family: 'Press Start 2P', monospace;
-      font-size: 0.65rem;
-      color: #fff;
-      letter-spacing: 0.15em;
+      font-size: 0.7rem;
+      color: #000;
       cursor: pointer;
-      margin-top: 0.75rem;
-      box-shadow: 0 0 20px #ff003c55;
-      transition: opacity 0.2s;
+      transition: transform 0.1s;
     }
-    .btn-launch:hover { opacity: 0.85; }
-    .btn-launch:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    #status-msg {
-      font-size: 0.7rem;
-      margin-top: 0.8rem;
-      min-height: 1.2em;
-      color: var(--cyan);
-    }
-
-    .warning {
-      border: 1px solid #ffe60033;
-      border-left: 3px solid var(--yellow);
-      padding: 0.9rem 1.1rem;
-      background: #ffe60008;
-      font-size: 0.7rem;
-      color: #ffffffaa;
-      line-height: 1.7;
-      border-radius: 2px;
-      margin-top: 1.5rem;
-    }
-    .warning strong {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.45rem;
-      color: var(--yellow);
-      display: block;
-      margin-bottom: 0.5rem;
-    }
-    @media (max-width: 500px) { .controls-panel { flex-direction: column; } }
+    .btn-launch:active { transform: scale(0.98); }
+    #status-msg { text-align: center; margin: 1rem 0; font-size: 0.8rem; color: var(--kirby-pink); }
   </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">ARCADE <span>EMU</span></div>
-  <div class="tagline">King of Fighters 94 — Neo Geo</div>
-  <div class="divider"></div>
+  <div class="logo">KIRBY <span>ARCADE</span></div>
+  <div class="tagline">ESPECIAL PARA O BENJI</div>
 </header>
 
 <main>
-
-  <!-- CONFIG INFO -->
-  <div class="config-box">
-    <h2>▶ CONFIGURAÇÃO DETECTADA</h2>
-
-    <div class="info-row">
-      <span class="tag">CORE</span>
-      <span class="val">fbneo (FinalBurn Neo)</span>
-      <span class="badge ok">✔ OK</span>
-    </div>
-    <div class="info-row">
-      <span class="tag">JOGO</span>
-      <span class="val">roms/kof94.zip</span>
-      <span class="badge ok">✔ OK</span>
-    </div>
-    <div class="info-row">
-      <span class="tag">BIOS</span>
-      <span class="val">roms/neogeo.zip</span>
-      <span class="badge ok">✔ OK</span>
-    </div>
-
-    <div id="status-msg"></div>
-    <button class="btn-launch" id="btnLaunch" onclick="launchGame()">► INICIAR KOF 94</button>
-  </div>
-
-  <!-- EMULADOR -->
   <div class="arcade-cabinet" id="cabinet" style="display:none">
-    <div class="screen-label">● NEO GEO MVS — KOF 94 ●</div>
     <div id="game"></div>
-    <div class="controls-panel">
-      <div class="ctrl-group">
-        <div class="ctrl-label">Movimento</div>
-        <div class="ctrl-row"><span class="kbd">↑ ↓ ← →</span> Direcional</div>
-      </div>
-      <div class="ctrl-group">
-        <div class="ctrl-label">Ações</div>
-        <div class="ctrl-row"><span class="kbd">A</span> Soco Fraco</div>
-        <div class="ctrl-row"><span class="kbd">S</span> Soco Forte</div>
-        <div class="ctrl-row"><span class="kbd">Z</span> Chute Fraco</div>
-        <div class="ctrl-row"><span class="kbd">X</span> Chute Forte</div>
-      </div>
-      <div class="ctrl-group">
-        <div class="ctrl-label">Sistema</div>
-        <div class="ctrl-row"><span class="kbd">Enter</span> Start P1</div>
-        <div class="ctrl-row"><span class="kbd">Shift</span> Select/Coin</div>
-        <div class="ctrl-row"><span class="kbd">Esc</span> Menu</div>
-      </div>
-    </div>
   </div>
 
-  <div class="warning">
-    <strong>⚠ AVISO LEGAL</strong>
-    Este emulador é apenas a casca técnica. Você é responsável por obter ROMs de forma legal.
-    Distribuir ROMs protegidas por direitos autorais é ilegal.
-  </div>
-
+  <div id="status-msg">Pronto para jogar?</div>
+  <button class="btn-launch" id="btnLaunch" onclick="launchGame()">⭐ INICIAR AVENTURA ⭐</button>
 </main>
 
 <script>
-  function setStatus(msg, color) {
-    const el = document.getElementById('status-msg');
-    el.textContent = msg;
-    el.style.color = color || '#00f0ff';
-  }
-
   function launchGame() {
-    document.getElementById('btnLaunch').disabled = true;
-    setStatus('⏳ Iniciando emulador...', '#ffe600');
-
+    document.getElementById('btnLaunch').style.display = 'none';
     const cabinet = document.getElementById('cabinet');
     cabinet.style.display = 'block';
 
-    // HTML do iframe — isolado para evitar conflito de variáveis globais
     const iframeHTML = `<!DOCTYPE html>
 <html>
 <head>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#000; width:100vw; height:100vh; overflow:hidden; }
-  #game { width:100%; height:100%; }
-</style>
+  <style>body { margin:0; background:#000; overflow:hidden; }</style>
 </head>
 <body>
-<div id="game"></div>
-<script>
-  EJS_player        = '#game';
-  EJS_core          = 'fbneo';
-  EJS_gameUrl       = 'roms/kof94.zip';
-  EJS_biosUrl       = 'roms/neogeo.zip';
-  EJS_pathtodata    = 'https://cdn.emulatorjs.org/stable/data/';
-  EJS_color         = '#ff003c';
-  EJS_language      = 'pt-BR';
-  EJS_defaultControls = 1;
-<\/script>
-<script src="https://cdn.emulatorjs.org/stable/data/loader.js"><\/script>
+  <div id="game"></div>
+  <script>
+    // Correção dos erros de 'undefined' e mapeamento de teclas
+    EJS_player = '#game';
+    EJS_core = 'fbneo';
+    EJS_gameUrl = 'roms/kof94.zip';
+    EJS_biosUrl = 'roms/neogeo.zip';
+    EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+    EJS_startOnLoaded = true;
+    EJS_volume = 0.5;
+    
+    // Mapeamento manual para evitar erro no setupKeys
+    EJS_buttons = {
+      '0': { 
+        'v': [
+          {'k': 38}, {'k': 40}, {'k': 37}, {'k': 39}, // Setas
+          {'k': 65}, {'k': 83}, {'k': 90}, {'k': 88}, // A, S, Z, X
+          {'k': 13}, {'k': 16} // Start, Select
+        ]
+      }
+    };
+
+    // Configurações extras de estabilidade
+    EJS_DEBUG_XX = false; 
+    EJS_defaultControls = 1;
+  <\/script>
+  <script src="https://cdn.emulatorjs.org/stable/data/loader.js"><\/script>
 </body>
 </html>`;
 
-    const game = document.getElementById('game');
-    game.innerHTML = '';
-    game.style.height = Math.round(game.offsetWidth * 0.75) + 'px';
-
+    const gameDiv = document.getElementById('game');
     const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;background:#000;';
+    iframe.style.cssText = 'width:100%; height:100%; border:none;';
     iframe.srcdoc = iframeHTML;
-    game.appendChild(iframe);
-
-    setStatus('✔ Emulador carregado! Clique em START dentro da tela.', '#00ff66');
-
-    setTimeout(() => cabinet.scrollIntoView({ behavior: 'smooth' }), 400);
+    gameDiv.appendChild(iframe);
   }
 </script>
-
 </body>
 </html>
