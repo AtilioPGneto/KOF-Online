@@ -13,248 +13,69 @@
       --dark: #0a0a0f;
       --panel: #10101a;
       --border: #1e1e2e;
-      --glow-red: 0 0 10px #ff003c88, 0 0 30px #ff003c44;
-      --glow-cyan: 0 0 10px #00f0ff88, 0 0 30px #00f0ff44;
-      --glow-yellow: 0 0 10px #ffe60088, 0 0 30px #ffe60044;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       background: var(--dark);
       color: #fff;
       font-family: 'Share Tech Mono', monospace;
       min-height: 100vh;
-      overflow-x: hidden;
     }
-
-    /* Scanline overlay */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,0,0,0.15) 2px,
-        rgba(0,0,0,0.15) 4px
-      );
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px);
       pointer-events: none;
       z-index: 9999;
     }
-
-    /* Noise texture */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 9998;
-      opacity: 0.4;
-    }
-
     header {
       text-align: center;
-      padding: 2.5rem 1rem 1.5rem;
-      position: relative;
+      padding: 2rem 1rem 1.2rem;
     }
-
     .logo {
       font-family: 'Press Start 2P', monospace;
-      font-size: clamp(1.2rem, 4vw, 2.2rem);
-      letter-spacing: 0.15em;
+      font-size: clamp(1rem, 4vw, 2rem);
       color: var(--yellow);
-      text-shadow: var(--glow-yellow);
-      animation: flicker 6s infinite;
+      text-shadow: 0 0 20px #ffe60066;
     }
-
-    .logo span {
-      color: var(--red);
-      text-shadow: var(--glow-red);
-    }
-
+    .logo span { color: var(--red); text-shadow: 0 0 20px #ff003c66; }
     .tagline {
-      margin-top: 0.75rem;
-      font-size: 0.7rem;
-      color: var(--cyan);
-      text-shadow: var(--glow-cyan);
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-    }
-
-    .divider {
-      width: 100%;
-      max-width: 700px;
-      margin: 1.5rem auto;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--red), var(--yellow), var(--cyan), transparent);
-      box-shadow: 0 0 8px var(--red);
-    }
-
-    main {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 0 1.2rem 3rem;
-    }
-
-    /* SCREEN / EMULATOR BOX */
-    .arcade-cabinet {
-      background: var(--panel);
-      border: 2px solid var(--border);
-      border-radius: 4px;
-      overflow: hidden;
-      box-shadow: 0 0 0 1px #ffffff08, 0 8px 40px #000a, inset 0 0 60px #00000055;
-      position: relative;
-    }
-
-    .screen-bezel {
-      background: #05050d;
-      padding: 1rem;
-      border-bottom: 2px solid var(--border);
-    }
-
-    .screen-label {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.5rem;
-      color: #ffffff33;
-      letter-spacing: 0.2em;
-      margin-bottom: 0.75rem;
-      text-align: center;
-    }
-
-    #game {
-      width: 100%;
-      aspect-ratio: 4/3;
-      background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      border: 1px solid #ffffff0a;
-    }
-
-    .insert-coin {
-      text-align: center;
-      animation: blink 1.2s step-end infinite;
-    }
-
-    .insert-coin .icon {
-      font-size: 2.5rem;
-      display: block;
-      margin-bottom: 1rem;
-      filter: drop-shadow(0 0 8px var(--yellow));
-    }
-
-    .insert-coin p {
-      font-family: 'Press Start 2P', monospace;
-      font-size: clamp(0.5rem, 1.5vw, 0.75rem);
-      color: var(--yellow);
-      text-shadow: var(--glow-yellow);
-      letter-spacing: 0.15em;
-    }
-
-    /* CONTROLS PANEL */
-    .controls-panel {
-      padding: 1.2rem 1.5rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      align-items: flex-start;
-      justify-content: space-between;
-      background: #0c0c16;
-      border-top: 1px solid var(--border);
-    }
-
-    .ctrl-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      min-width: 160px;
-    }
-
-    .ctrl-label {
-      font-size: 0.6rem;
-      color: var(--red);
-      text-shadow: var(--glow-red);
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      margin-bottom: 0.2rem;
-    }
-
-    .ctrl-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.7rem;
-      color: #ffffffaa;
-    }
-
-    .kbd {
-      background: #1a1a2a;
-      border: 1px solid #ffffff22;
-      border-bottom: 2px solid #ffffff11;
-      border-radius: 3px;
-      padding: 0.15rem 0.4rem;
-      font-family: 'Share Tech Mono', monospace;
+      margin-top: 0.6rem;
       font-size: 0.65rem;
       color: var(--cyan);
-      text-shadow: var(--glow-cyan);
-      white-space: nowrap;
+      letter-spacing: 0.3em;
     }
+    .divider {
+      width: 100%; max-width: 700px; margin: 1.2rem auto;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--red), var(--yellow), var(--cyan), transparent);
+    }
+    main { max-width: 860px; margin: 0 auto; padding: 0 1.2rem 3rem; }
 
-    /* CONFIG SECTION */
-    .config-section {
-      margin-top: 2rem;
+    .config-box {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 4px;
-      overflow: hidden;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
     }
-
-    .config-header {
-      background: #0c0c16;
-      padding: 0.8rem 1.2rem;
+    .config-box h2 {
       font-family: 'Press Start 2P', monospace;
       font-size: 0.55rem;
       color: var(--cyan);
-      text-shadow: var(--glow-cyan);
       letter-spacing: 0.15em;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
+      margin-bottom: 1.2rem;
     }
-
-    .config-header::before {
-      content: '▶';
-      color: var(--red);
-    }
-
-    .config-body {
-      padding: 1.2rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .field-row {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    .field-label {
+    .field { margin-bottom: 1rem; }
+    .field label {
+      display: block;
       font-size: 0.65rem;
       color: #ffffff66;
+      margin-bottom: 0.4rem;
       letter-spacing: 0.1em;
     }
-
-    .field-label span {
-      color: var(--red);
-    }
-
+    .field label span { color: var(--red); }
     select, input[type="text"] {
       background: #05050d;
       border: 1px solid #ffffff18;
@@ -265,20 +86,13 @@
       padding: 0.5rem 0.75rem;
       width: 100%;
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
     }
-
-    select:focus, input[type="text"]:focus {
-      border-color: var(--cyan);
-      box-shadow: var(--glow-cyan);
-    }
-
+    select:focus, input:focus { border-color: var(--cyan); }
     select option { background: #0a0a0f; }
 
     .btn-launch {
-      margin-top: 0.5rem;
       width: 100%;
-      padding: 0.85rem;
+      padding: 0.9rem;
       background: var(--red);
       border: none;
       border-radius: 3px;
@@ -287,219 +101,241 @@
       color: #fff;
       letter-spacing: 0.15em;
       cursor: pointer;
-      text-transform: uppercase;
-      box-shadow: var(--glow-red), inset 0 1px 0 rgba(255,255,255,0.15);
-      transition: transform 0.1s, box-shadow 0.2s;
-      position: relative;
+      margin-top: 0.5rem;
+      box-shadow: 0 0 20px #ff003c55;
+      transition: opacity 0.2s;
+    }
+    .btn-launch:hover { opacity: 0.85; }
+    .btn-launch:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #emulator-wrapper {
+      display: none;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
       overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    #emulator-wrapper.visible { display: block; }
+    .screen-label {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.45rem;
+      color: #ffffff33;
+      letter-spacing: 0.2em;
+      padding: 0.6rem 1rem;
+      background: #05050d;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+    #game {
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: #000;
+      position: relative;
+    }
+    #game iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
     }
 
-    .btn-launch::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+    .controls-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      background: #0c0c16;
+      border-top: 1px solid var(--border);
+    }
+    .ctrl-group { min-width: 140px; }
+    .ctrl-label {
+      font-size: 0.55rem;
+      color: var(--red);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+    .ctrl-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.65rem;
+      color: #ffffffaa;
+      margin-bottom: 0.2rem;
+    }
+    .kbd {
+      background: #1a1a2a;
+      border: 1px solid #ffffff22;
+      border-bottom: 2px solid #ffffff11;
+      border-radius: 3px;
+      padding: 0.1rem 0.35rem;
+      font-size: 0.6rem;
+      color: var(--cyan);
+      white-space: nowrap;
     }
 
-    .btn-launch:hover {
-      box-shadow: 0 0 20px #ff003ccc, 0 0 60px #ff003c66;
-      transform: translateY(-1px);
+    #status-msg {
+      font-size: 0.7rem;
+      color: var(--yellow);
+      margin-top: 0.8rem;
+      min-height: 1.2em;
     }
 
-    .btn-launch:active {
-      transform: translateY(1px);
-    }
-
-    /* WARNING BOX */
     .warning {
-      margin-top: 2rem;
       border: 1px solid #ffe60033;
       border-left: 3px solid var(--yellow);
       padding: 0.9rem 1.1rem;
       background: #ffe60008;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: #ffffffaa;
       line-height: 1.7;
       border-radius: 2px;
+      margin-top: 1.5rem;
     }
-
     .warning strong {
-      color: var(--yellow);
-      text-shadow: var(--glow-yellow);
       font-family: 'Press Start 2P', monospace;
-      font-size: 0.5rem;
-      letter-spacing: 0.1em;
+      font-size: 0.45rem;
+      color: var(--yellow);
       display: block;
       margin-bottom: 0.5rem;
     }
 
-    /* STATUS BAR */
-    .status-bar {
-      margin-top: 2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      font-size: 0.65rem;
-      color: #ffffff44;
-      letter-spacing: 0.1em;
-    }
-
-    .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--cyan);
-      box-shadow: var(--glow-cyan);
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    /* ANIMATIONS */
-    @keyframes flicker {
-      0%, 95%, 100% { opacity: 1; }
-      96% { opacity: 0.6; }
-      97% { opacity: 1; }
-      98% { opacity: 0.4; }
-      99% { opacity: 1; }
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.7); }
-    }
-
-    /* RESPONSIVE */
     @media (max-width: 500px) {
       .controls-panel { flex-direction: column; }
-      .ctrl-group { min-width: unset; }
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <div class="logo">ARCADE <span>EMU</span></div>
-    <div class="tagline">Emulador Online — GitHub Pages Edition</div>
-    <div class="divider"></div>
-  </header>
+<header>
+  <div class="logo">ARCADE <span>EMU</span></div>
+  <div class="tagline">Emulador Online — GitHub Pages Edition</div>
+  <div class="divider"></div>
+</header>
 
-  <main>
+<main>
 
-    <!-- TELA DO EMULADOR -->
-    <div class="arcade-cabinet">
-      <div class="screen-bezel">
-        <div class="screen-label">● DISPLAY OUTPUT ●</div>
-        <div id="game">
-          <div class="insert-coin">
-            <span class="icon">🪙</span>
-            <p>INSERT COIN TO PLAY</p>
-          </div>
-        </div>
-      </div>
+  <div class="config-box">
+    <h2>▶ CONFIGURAÇÃO</h2>
 
-      <!-- CONTROLES INFO -->
-      <div class="controls-panel">
-        <div class="ctrl-group">
-          <div class="ctrl-label">Movimento</div>
-          <div class="ctrl-row"><span class="kbd">↑ ↓ ← →</span> Direcional</div>
-        </div>
-        <div class="ctrl-group">
-          <div class="ctrl-label">Ações</div>
-          <div class="ctrl-row"><span class="kbd">A</span> Soco Fraco</div>
-          <div class="ctrl-row"><span class="kbd">S</span> Soco Forte</div>
-          <div class="ctrl-row"><span class="kbd">Z</span> Chute Fraco</div>
-          <div class="ctrl-row"><span class="kbd">X</span> Chute Forte</div>
-        </div>
-        <div class="ctrl-group">
-          <div class="ctrl-label">Sistema</div>
-          <div class="ctrl-row"><span class="kbd">Enter</span> Start</div>
-          <div class="ctrl-row"><span class="kbd">Shift</span> Select</div>
-          <div class="ctrl-row"><span class="kbd">Esc</span> Menu</div>
-        </div>
-      </div>
+    <div class="field">
+      <label>Sistema / Core <span>*</span></label>
+      <select id="coreSelect">
+        <option value="mame2003">Arcade — MAME 2003 (KOF, Street Fighter...)</option>
+        <option value="fbalpha2012_neogeo">Neo Geo — FBAlpha</option>
+        <option value="snes9x">SNES — Snes9x</option>
+        <option value="mgba">Game Boy Advance — mGBA</option>
+        <option value="pcsx_rearmed">PlayStation 1 — PCSX</option>
+        <option value="mupen64plus_next">Nintendo 64 — Mupen64Plus</option>
+      </select>
     </div>
 
-    <!-- CONFIGURAÇÃO -->
-    <div class="config-section">
-      <div class="config-header">CONFIGURAÇÃO DO EMULADOR</div>
-      <div class="config-body">
+    <div class="field">
+      <label>Caminho da ROM <span>*</span></label>
+      <input type="text" id="romPath" placeholder="roms/kof2002.zip" />
+    </div>
 
-        <div class="field-row">
-          <div class="field-label">Sistema / Core <span>*</span></div>
-          <select id="coreSelect">
-            <option value="mame2003">Arcade — MAME 2003 (KOF, Street Fighter...)</option>
-            <option value="fbalpha2012_neogeo">Neo Geo — FBAlpha</option>
-            <option value="snes9x">SNES — Snes9x</option>
-            <option value="mgba">Game Boy Advance — mGBA</option>
-            <option value="pcsx_rearmed">PlayStation 1 — PCSX</option>
-            <option value="mupen64plus_next">Nintendo 64 — Mupen64Plus</option>
-          </select>
-        </div>
+    <div id="status-msg"></div>
 
-        <div class="field-row">
-          <div class="field-label">Caminho da ROM <span>*</span></div>
-          <input type="text" id="romPath" value="roms/seu-jogo.zip" placeholder="roms/seu-jogo.zip" />
-        </div>
+    <button class="btn-launch" id="btnLaunch" onclick="launchGame()">► INICIAR JOGO</button>
+  </div>
 
-        <button class="btn-launch" onclick="launchGame()">► INICIAR JOGO</button>
-
+  <div id="emulator-wrapper">
+    <div class="screen-label">● DISPLAY OUTPUT ●</div>
+    <div id="game"></div>
+    <div class="controls-panel">
+      <div class="ctrl-group">
+        <div class="ctrl-label">Movimento</div>
+        <div class="ctrl-row"><span class="kbd">↑ ↓ ← →</span> Direcional</div>
+      </div>
+      <div class="ctrl-group">
+        <div class="ctrl-label">Ações</div>
+        <div class="ctrl-row"><span class="kbd">A</span> Soco Fraco</div>
+        <div class="ctrl-row"><span class="kbd">S</span> Soco Forte</div>
+        <div class="ctrl-row"><span class="kbd">Z</span> Chute Fraco</div>
+        <div class="ctrl-row"><span class="kbd">X</span> Chute Forte</div>
+      </div>
+      <div class="ctrl-group">
+        <div class="ctrl-label">Sistema</div>
+        <div class="ctrl-row"><span class="kbd">Enter</span> Start</div>
+        <div class="ctrl-row"><span class="kbd">Shift</span> Select</div>
+        <div class="ctrl-row"><span class="kbd">Esc</span> Menu</div>
       </div>
     </div>
+  </div>
 
-    <!-- AVISO -->
-    <div class="warning">
-      <strong>⚠ AVISO LEGAL</strong>
-      Este emulador é apenas a casca técnica. Você é responsável por obter ROMs de forma legal.
-      Distribuir ROMs protegidas por direitos autorais é ilegal. Use apenas ROMs de jogos que você possui
-      ou que sejam de domínio público.
-    </div>
+  <div class="warning">
+    <strong>⚠ AVISO LEGAL</strong>
+    Este emulador é apenas a casca técnica. Você é responsável por obter ROMs de forma legal.
+    Distribuir ROMs protegidas por direitos autorais é ilegal.
+  </div>
 
-    <div class="status-bar">
-      <div class="dot"></div>
-      EMULATORJS CDN — STABLE — v4.x &nbsp;|&nbsp; GitHub Pages Ready
-    </div>
+</main>
 
-  </main>
-
-  <!-- EMULATORJS -->
-  <script>
-let ejsLoaded = false;
-
-function launchGame() {
-  const core = document.getElementById('coreSelect').value;
-  const rom  = document.getElementById('romPath').value.trim();
-
-  if (!rom) {
-    alert('Informe o caminho da ROM antes de iniciar.');
-    return;
+<script>
+  function setStatus(msg, color) {
+    const el = document.getElementById('status-msg');
+    el.textContent = msg;
+    el.style.color = color || '#ffe600';
   }
 
-  // Impede carregar o script duas vezes
-  if (ejsLoaded) {
-    alert('Recarregue a página para trocar de jogo.');
-    return;
+  function launchGame() {
+    const core = document.getElementById('coreSelect').value;
+    const rom  = document.getElementById('romPath').value.trim();
+
+    if (!rom) {
+      setStatus('⚠ Informe o caminho da ROM antes de continuar.', '#ff003c');
+      return;
+    }
+
+    document.getElementById('btnLaunch').disabled = true;
+    setStatus('⏳ Carregando emulador...', '#00f0ff');
+
+    const wrapper = document.getElementById('emulator-wrapper');
+    wrapper.classList.add('visible');
+
+    // Monta o HTML do iframe com as variáveis já definidas
+    // Usando iframe isolado para evitar conflito de variáveis globais (erro EJS_STORAGE)
+    const iframeHTML = `<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#000; width:100vw; height:100vh; overflow:hidden; }
+  #game { width:100%; height:100%; }
+</style>
+</head>
+<body>
+<div id="game"></div>
+<script>
+  EJS_player     = '#game';
+  EJS_core       = '${core}';
+  EJS_gameUrl    = '${rom}';
+  EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+  EJS_color      = '#ff003c';
+  EJS_language   = 'pt-BR';
+<\/script>
+<script src="https://cdn.emulatorjs.org/stable/data/loader.js"><\/script>
+</body>
+</html>`;
+
+    const game = document.getElementById('game');
+    game.innerHTML = '';
+
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;background:#000;';
+    iframe.srcdoc = iframeHTML;
+
+    // Ajusta altura do container
+    game.style.height = Math.round(game.offsetWidth * 0.75) + 'px';
+    game.appendChild(iframe);
+
+    setStatus('✔ Emulador carregado! Aguarde o jogo iniciar.', '#00f0ff');
+
+    setTimeout(() => wrapper.scrollIntoView({ behavior: 'smooth' }), 300);
   }
-
-  const gameDiv = document.getElementById('game');
-  gameDiv.innerHTML = '';
-
-  window.EJS_player     = '#game';
-  window.EJS_core       = core;
-  window.EJS_gameUrl    = rom;
-  window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
-  window.EJS_color      = '#ff003c';
-
-  const script = document.createElement('script');
-  script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
-  document.body.appendChild(script);
-
-  ejsLoaded = true;
-}
-  </script>
+</script>
 
 </body>
 </html>
