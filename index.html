@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARCADE EMU</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --red: #ff003c;
+      --yellow: #ffe600;
+      --cyan: #00f0ff;
+      --dark: #0a0a0f;
+      --panel: #10101a;
+      --border: #1e1e2e;
+      --glow-red: 0 0 10px #ff003c88, 0 0 30px #ff003c44;
+      --glow-cyan: 0 0 10px #00f0ff88, 0 0 30px #00f0ff44;
+      --glow-yellow: 0 0 10px #ffe60088, 0 0 30px #ffe60044;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--dark);
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.15) 2px,
+        rgba(0,0,0,0.15) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Noise texture */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9998;
+      opacity: 0.4;
+    }
+
+    header {
+      text-align: center;
+      padding: 2.5rem 1rem 1.5rem;
+      position: relative;
+    }
+
+    .logo {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(1.2rem, 4vw, 2.2rem);
+      letter-spacing: 0.15em;
+      color: var(--yellow);
+      text-shadow: var(--glow-yellow);
+      animation: flicker 6s infinite;
+    }
+
+    .logo span {
+      color: var(--red);
+      text-shadow: var(--glow-red);
+    }
+
+    .tagline {
+      margin-top: 0.75rem;
+      font-size: 0.7rem;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+    }
+
+    .divider {
+      width: 100%;
+      max-width: 700px;
+      margin: 1.5rem auto;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--red), var(--yellow), var(--cyan), transparent);
+      box-shadow: 0 0 8px var(--red);
+    }
+
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 1.2rem 3rem;
+    }
+
+    /* SCREEN / EMULATOR BOX */
+    .arcade-cabinet {
+      background: var(--panel);
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 0 0 1px #ffffff08, 0 8px 40px #000a, inset 0 0 60px #00000055;
+      position: relative;
+    }
+
+    .screen-bezel {
+      background: #05050d;
+      padding: 1rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .screen-label {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.5rem;
+      color: #ffffff33;
+      letter-spacing: 0.2em;
+      margin-bottom: 0.75rem;
+      text-align: center;
+    }
+
+    #game {
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border: 1px solid #ffffff0a;
+    }
+
+    .insert-coin {
+      text-align: center;
+      animation: blink 1.2s step-end infinite;
+    }
+
+    .insert-coin .icon {
+      font-size: 2.5rem;
+      display: block;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 0 8px var(--yellow));
+    }
+
+    .insert-coin p {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(0.5rem, 1.5vw, 0.75rem);
+      color: var(--yellow);
+      text-shadow: var(--glow-yellow);
+      letter-spacing: 0.15em;
+    }
+
+    /* CONTROLS PANEL */
+    .controls-panel {
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-start;
+      justify-content: space-between;
+      background: #0c0c16;
+      border-top: 1px solid var(--border);
+    }
+
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      min-width: 160px;
+    }
+
+    .ctrl-label {
+      font-size: 0.6rem;
+      color: var(--red);
+      text-shadow: var(--glow-red);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+    }
+
+    .ctrl-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+      color: #ffffffaa;
+    }
+
+    .kbd {
+      background: #1a1a2a;
+      border: 1px solid #ffffff22;
+      border-bottom: 2px solid #ffffff11;
+      border-radius: 3px;
+      padding: 0.15rem 0.4rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+      white-space: nowrap;
+    }
+
+    /* CONFIG SECTION */
+    .config-section {
+      margin-top: 2rem;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .config-header {
+      background: #0c0c16;
+      padding: 0.8rem 1.2rem;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.55rem;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+      letter-spacing: 0.15em;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .config-header::before {
+      content: '▶';
+      color: var(--red);
+    }
+
+    .config-body {
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .field-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .field-label {
+      font-size: 0.65rem;
+      color: #ffffff66;
+      letter-spacing: 0.1em;
+    }
+
+    .field-label span {
+      color: var(--red);
+    }
+
+    select, input[type="text"] {
+      background: #05050d;
+      border: 1px solid #ffffff18;
+      border-radius: 3px;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      padding: 0.5rem 0.75rem;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: var(--cyan);
+      box-shadow: var(--glow-cyan);
+    }
+
+    select option { background: #0a0a0f; }
+
+    .btn-launch {
+      margin-top: 0.5rem;
+      width: 100%;
+      padding: 0.85rem;
+      background: var(--red);
+      border: none;
+      border-radius: 3px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.65rem;
+      color: #fff;
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: var(--glow-red), inset 0 1px 0 rgba(255,255,255,0.15);
+      transition: transform 0.1s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-launch::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+    }
+
+    .btn-launch:hover {
+      box-shadow: 0 0 20px #ff003ccc, 0 0 60px #ff003c66;
+      transform: translateY(-1px);
+    }
+
+    .btn-launch:active {
+      transform: translateY(1px);
+    }
+
+    /* WARNING BOX */
+    .warning {
+      margin-top: 2rem;
+      border: 1px solid #ffe60033;
+      border-left: 3px solid var(--yellow);
+      padding: 0.9rem 1.1rem;
+      background: #ffe60008;
+      font-size: 0.72rem;
+      color: #ffffffaa;
+      line-height: 1.7;
+      border-radius: 2px;
+    }
+
+    .warning strong {
+      color: var(--yellow);
+      text-shadow: var(--glow-yellow);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.5rem;
+      letter-spacing: 0.1em;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    /* STATUS BAR */
+    .status-bar {
+      margin-top: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.65rem;
+      color: #ffffff44;
+      letter-spacing: 0.1em;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: var(--glow-cyan);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* ANIMATIONS */
+    @keyframes flicker {
+      0%, 95%, 100% { opacity: 1; }
+      96% { opacity: 0.6; }
+      97% { opacity: 1; }
+      98% { opacity: 0.4; }
+      99% { opacity: 1; }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.7); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 500px) {
+      .controls-panel { flex-direction: column; }
+      .ctrl-group { min-width: unset; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">ARCADE <span>EMU</span></div>
+    <div class="tagline">Emulador Online — GitHub Pages Edition</div>
+    <div class="divider"></div>
+  </header>
+
+  <main>
+
+    <!-- TELA DO EMULADOR -->
+    <div class="arcade-cabinet">
+      <div class="screen-bezel">
+        <div class="screen-label">● DISPLAY OUTPUT ●</div>
+        <div id="game">
+          <div class="insert-coin">
+            <span class="icon">🪙</span>
+            <p>INSERT COIN TO PLAY</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTROLES INFO -->
+      <div class="controls-panel">
+        <div class="ctrl-group">
+          <div class="ctrl-label">Movimento</div>
+          <div class="ctrl-row"><span class="kbd">↑ ↓ ← →</span> Direcional</div>
+        </div>
+        <div class="ctrl-group">
+          <div class="ctrl-label">Ações</div>
+          <div class="ctrl-row"><span class="kbd">A</span> Soco Fraco</div>
+          <div class="ctrl-row"><span class="kbd">S</span> Soco Forte</div>
+          <div class="ctrl-row"><span class="kbd">Z</span> Chute Fraco</div>
+          <div class="ctrl-row"><span class="kbd">X</span> Chute Forte</div>
+        </div>
+        <div class="ctrl-group">
+          <div class="ctrl-label">Sistema</div>
+          <div class="ctrl-row"><span class="kbd">Enter</span> Start</div>
+          <div class="ctrl-row"><span class="kbd">Shift</span> Select</div>
+          <div class="ctrl-row"><span class="kbd">Esc</span> Menu</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIGURAÇÃO -->
+    <div class="config-section">
+      <div class="config-header">CONFIGURAÇÃO DO EMULADOR</div>
+      <div class="config-body">
+
+        <div class="field-row">
+          <div class="field-label">Sistema / Core <span>*</span></div>
+          <select id="coreSelect">
+            <option value="mame2003">Arcade — MAME 2003 (KOF, Street Fighter...)</option>
+            <option value="fbalpha2012_neogeo">Neo Geo — FBAlpha</option>
+            <option value="snes9x">SNES — Snes9x</option>
+            <option value="mgba">Game Boy Advance — mGBA</option>
+            <option value="pcsx_rearmed">PlayStation 1 — PCSX</option>
+            <option value="mupen64plus_next">Nintendo 64 — Mupen64Plus</option>
+          </select>
+        </div>
+
+        <div class="field-row">
+          <div class="field-label">Caminho da ROM <span>*</span></div>
+          <input type="text" id="romPath" value="roms/seu-jogo.zip" placeholder="roms/seu-jogo.zip" />
+        </div>
+
+        <button class="btn-launch" onclick="launchGame()">► INICIAR JOGO</button>
+
+      </div>
+    </div>
+
+    <!-- AVISO -->
+    <div class="warning">
+      <strong>⚠ AVISO LEGAL</strong>
+      Este emulador é apenas a casca técnica. Você é responsável por obter ROMs de forma legal.
+      Distribuir ROMs protegidas por direitos autorais é ilegal. Use apenas ROMs de jogos que você possui
+      ou que sejam de domínio público.
+    </div>
+
+    <div class="status-bar">
+      <div class="dot"></div>
+      EMULATORJS CDN — STABLE — v4.x &nbsp;|&nbsp; GitHub Pages Ready
+    </div>
+
+  </main>
+
+  <!-- EMULATORJS -->
+  <script>
+    function launchGame() {
+      const core = document.getElementById('coreSelect').value;
+      const rom  = document.getElementById('romPath').value.trim();
+
+      if (!rom) {
+        alert('Informe o caminho da ROM antes de iniciar.');
+        return;
+      }
+
+      // Limpa o container
+      const gameDiv = document.getElementById('game');
+      gameDiv.innerHTML = '';
+
+      // Configurações do EmulatorJS
+      window.EJS_player      = '#game';
+      window.EJS_core        = core;
+      window.EJS_gameUrl     = rom;
+      window.EJS_pathtodata  = 'https://cdn.emulatorjs.org/stable/data/';
+      window.EJS_color       = '#ff003c';
+
+      // Carrega o loader dinamicamente
+      const script = document.createElement('script');
+      script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+      document.body.appendChild(script);
+    }
+  </script>
+
+</body>
+</html>
