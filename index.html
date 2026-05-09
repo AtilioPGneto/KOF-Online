@@ -467,31 +467,38 @@
 
   <!-- EMULATORJS -->
   <script>
-    function launchGame() {
-      const core = document.getElementById('coreSelect').value;
-      const rom  = document.getElementById('romPath').value.trim();
+let ejsLoaded = false;
 
-      if (!rom) {
-        alert('Informe o caminho da ROM antes de iniciar.');
-        return;
-      }
+function launchGame() {
+  const core = document.getElementById('coreSelect').value;
+  const rom  = document.getElementById('romPath').value.trim();
 
-      // Limpa o container
-      const gameDiv = document.getElementById('game');
-      gameDiv.innerHTML = '';
+  if (!rom) {
+    alert('Informe o caminho da ROM antes de iniciar.');
+    return;
+  }
 
-      // Configurações do EmulatorJS
-      window.EJS_player      = '#game';
-      window.EJS_core        = core;
-      window.EJS_gameUrl     = rom;
-      window.EJS_pathtodata  = 'https://cdn.emulatorjs.org/stable/data/';
-      window.EJS_color       = '#ff003c';
+  // Impede carregar o script duas vezes
+  if (ejsLoaded) {
+    alert('Recarregue a página para trocar de jogo.');
+    return;
+  }
 
-      // Carrega o loader dinamicamente
-      const script = document.createElement('script');
-      script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
-      document.body.appendChild(script);
-    }
+  const gameDiv = document.getElementById('game');
+  gameDiv.innerHTML = '';
+
+  window.EJS_player     = '#game';
+  window.EJS_core       = core;
+  window.EJS_gameUrl    = rom;
+  window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+  window.EJS_color      = '#ff003c';
+
+  const script = document.createElement('script');
+  script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+  document.body.appendChild(script);
+
+  ejsLoaded = true;
+}
   </script>
 
 </body>
