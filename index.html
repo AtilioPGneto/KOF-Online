@@ -113,15 +113,28 @@
   <script src="https://cdn.emulatorjs.org/stable/data/loader.js"><\/script>
 </body>
 </html>`;
+  EJS_player = '#game';
+  EJS_core = 'geolith'; // Mudança para um core mais tolerante
+  EJS_gameUrl = 'roms/kof94.zip';
+  EJS_biosUrl = 'roms/neogeo.zip';
+  EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+  EJS_startOnLoaded = true;
+  
+  // Estas linhas forçam o emulador a ignorar erros pequenos de checksum
+  EJS_neogeoBios = true;
+  EJS_load_no_rom = false; 
 
-    const iframe = document.createElement('iframe');
-    iframe.style.width = '100%';
-    iframe.style.height = '100%';
-    iframe.style.border = 'none';
-    iframe.srcdoc = iframeHTML;
-    container.appendChild(iframe);
-     EJS_neogeoBios = true;
-  }
+  // Mapeamento manual para evitar o erro de 'undefined' no setupKeys
+  EJS_buttons = {
+    '0': {
+      'v': [
+        { 'k': 38 }, { 'k': 40 }, { 'k': 37 }, { 'k': 39 }, // Direcionais
+        { 'k': 65 }, { 'k': 83 }, { 'k': 90 }, { 'k': 88 }, // Botões A,B,C,D
+        { 'k': 13 }, { 'k': 16 } // Start e Select
+      ]
+    }
+  };
+</script>
 </script>
 </body>
 </html>
