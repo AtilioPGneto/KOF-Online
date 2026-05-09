@@ -15,40 +15,53 @@
       background: var(--dark); color: #fff;
       font-family: 'Share Tech Mono', monospace;
       display: flex; flex-direction: column; align-items: center; padding: 20px;
+      min-height: 100vh;
     }
     .arcade-cabinet {
       width: 100%; max-width: 800px;
       background: var(--panel); border: 2px solid var(--border);
-      border-radius: 8px; padding: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      border-radius: 8px; padding: 10px; box-shadow: 0 0 30px rgba(0,0,0,0.7);
     }
-    #game-container { width: 100%; aspect-ratio: 4/3; background: #000; }
+    #game-container { 
+      width: 100%; aspect-ratio: 4/3; background: #000; 
+      display: flex; align-items: center; justify-content: center;
+    }
     .btn-launch {
       margin-top: 20px; padding: 15px 30px;
       background: var(--red); color: white; border: none;
       font-family: 'Press Start 2P', cursive; cursor: pointer; font-size: 12px;
+      box-shadow: 0 4px 0 #8b0021; transition: all 0.1s;
     }
-    .btn-launch:disabled { background: #444; cursor: not-allowed; }
+    .btn-launch:active { transform: translateY(4px); box-shadow: none; }
+    .btn-launch:disabled { background: #444; cursor: not-allowed; box-shadow: none; }
   </style>
 </head>
 <body>
 
   <header style="text-align: center; margin-bottom: 20px;">
-    <h1 style="font-family: 'Press Start 2P'; color: var(--cyan);">ARCADE EMU</h1>
+    <h1 style="font-family: 'Press Start 2P'; color: var(--cyan); font-size: 24px;">ARCADE EMU</h1>
+    <p style="color: var(--yellow); font-size: 10px; margin-top: 10px; letter-spacing: 2px;">NEO-GEO SYSTEM OPERATIONAL</p>
   </header>
 
   <div class="arcade-cabinet">
-    <div id="game-container"></div>
+    <div id="game-container">
+      <p id="placeholder" style="color: #333; font-family: 'Press Start 2P'; font-size: 10px;">INSERT COIN</p>
+    </div>
   </div>
 
   <button class="btn-launch" id="btnLaunch" onclick="launchGame()">INICIAR JOGO</button>
 
 <script>
   function launchGame() {
-    // Desabilita o botão para evitar múltiplos cliques
-    document.getElementById('btnLaunch').disabled = true;
+    const btn = document.getElementById('btnLaunch');
     const container = document.getElementById('game-container');
+    const placeholder = document.getElementById('placeholder');
+
+    btn.disabled = true;
+    btn.innerText = "CARREGANDO...";
+    if(placeholder) placeholder.remove();
     
-    // HTML que será injetado no iframe
+    // Conteúdo do emulador que será injetado no iframe
     const iframeHTML = `
 <!DOCTYPE html>
 <html>
@@ -58,21 +71,23 @@
 <body>
   <div id="game"></div>
   <script>
+    // Configurações Globais do EmulatorJS
     window.EJS_player = '#game';
-    window.EJS_core = 'geolith'; 
+    window.EJS_core = 'fbneo'; // Core original para KOF
     window.EJS_gameUrl = 'roms/kof94.zip';
     window.EJS_biosUrl = 'roms/neogeo.zip';
     window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
     window.EJS_startOnLoaded = true;
     window.EJS_neogeoBios = true;
-    window.EJS_volume = 0.5;
+    window.EJS_volume = 0.6;
 
+    // Mapeamento manual para evitar erros de leitura de botões 'undefined'
     window.EJS_buttons = {
       '0': {
         'v': [
-          { 'k': 38 }, { 'k': 40 }, { 'k': 37 }, { 'k': 39 }, 
-          { 'k': 65 }, { 'k': 83 }, { 'k': 90 }, { 'k': 88 }, 
-          { 'k': 13 }, { 'k': 16 }
+          { 'k': 38 }, { 'k': 40 }, { 'k': 37 }, { 'k': 39 }, // Cima, Baixo, Esq, Dir
+          { 'k': 65 }, { 'k': 83 }, { 'k': 90 }, { 'k': 88 }, // A, B, C, D
+          { 'k': 13 }, { 'k': 16 }                           // Start, Select
         ]
       }
     };
@@ -81,14 +96,13 @@
 </body>
 </html>`;
 
-    // Cria o iframe dinamicamente
+    // Criação dinâmica do iframe para isolar o ambiente do emulador
     const iframe = document.createElement('iframe');
     iframe.style.width = '100%';
     iframe.style.height = '100%';
     iframe.style.border = 'none';
     iframe.srcdoc = iframeHTML;
     
-    // Adiciona ao container
     container.appendChild(iframe);
   }
 </script>
